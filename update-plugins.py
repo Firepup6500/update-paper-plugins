@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from os import environ as env
 from requests import request
+from ast import literal_eval as litEval
 
 # Try to load cache
 print("[[  Info  ]] Trying to load installed versions from cache...")
@@ -19,7 +20,7 @@ hangarPlugins = {
     #    "slug-of-plugin": {"Channel": "channel-to-pull", "Version": 'version-to-pull or "latest"'}
 }
 spigotPlugins = {
-    #    "resource-id-of-plugin": {"Version": 'version-id-to-pull or "latest"'}
+    #    "resource-id-of-plugin": {"Version": 'version-id-to-pull or "latest"', "Name": "Friendly name used for local downloads of the plugin"}
 }
 geyser = True
 floodgate = True
@@ -36,16 +37,18 @@ if hangarPlugins and not env.get("HANGAR_KEY", ""):
 
 if hangarPlugins:
     for plugin in hangarPlugins:
-        # check
-        # download update
-        # update version storage to match
-        ...
+        version = hangarPlugins[plugin]["Version"]
+        if version == "latest":
+            version = request("GET", f"https://hangar.papermc.io/api/v1/projects/{plugin}/latest?channel={channel}").text
+        if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
+            # download update
+            knownVersions[plugin] = version
 
 if spigotPlugins:
     for plugin in spigotPlugins:
         version = spigotPlugins[plugin]["Version"]
-        if spigotPlugins[plugin]["Version"] == "latest":
-            version = le(request("GET", "https://api.spiget.org/v2/resources/60310/versions/latest").text)["id"]
+        if version == "latest":
+            version = litEval(request("GET", f"https://api.spiget.org/v2/resources/{plugin}/versions/latest").text)["id"]
         if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
             # download update
             knownVersions[plugin] = version
