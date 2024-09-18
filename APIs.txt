@@ -1,3 +1,4 @@
 https://rest.wiki/?https://raw.githubusercontent.com/SpiGetOrg/Documentation/master/swagger.yml# - Spigot
 https://hangar.papermc.io/api-docs#get-/api/v1/projects/-slug-/latest - Hangar
 https://docs.modrinth.com/#tag/version-files/operation/versionFromHash - Modrinth
+https://geysermc.org/wiki/api/downloads.geysermc.org/download-specific - Geyser/Floodgate
