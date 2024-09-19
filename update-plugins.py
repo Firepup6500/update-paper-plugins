@@ -84,7 +84,8 @@ if spigotPlugins:
                 f.write(
                     request(
                         "GET",
-                        f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download",
+                        f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download/proxy",
+                        allow_redirects=True,
                     ).content
                 )
             if knownVersions.get(plugin, "") and path.exists(
