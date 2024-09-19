@@ -81,32 +81,32 @@ if spigotPlugins:
                 f"??  DBUG  ?? Latest version of {pluginName}({plugin}) detected to be {version}, currently installed is {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'}"
             )
         if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
-            with open(f"plugins/{pluginName}-spigot-{version}.jar", "wb") as f:
+            r = request(
+                "GET",
+                f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download/proxy",
+                allow_redirects=True,
+            )
+            while r.status_code == 429:
+                print("||  Warn  || Spiget has ratelimited me, waiting 1s")
+                sleep(1)
                 r = request(
                     "GET",
                     f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download/proxy",
                     allow_redirects=True,
                 )
-                while r.status_code == 429:
-                    print("||  Warn  || Spiget has ratelimited me, waiting 1s")
-                    sleep(1)
-                    r = request(
-                        "GET",
-                        f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download/proxy",
-                        allow_redirects=True,
-                    )
-                if r.content == b"":
-                    print(
-                        f"""
+            if r.content == b"":
+                print(
+                    f"""
 !! Notice !! For whatever reason, {pluginName} is not available through the download proxy API.
 !! Notice !! The plugin download should be at https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download
 !! Notice !! I apologize for not being able to get this plugin on my own, but there's nothing I can do here.
 !! Notice !! I will mark this plugin's version as 'NULL-{version}'
 !! Notice !! Which will allow you to see if this plugin needs updates on later script runs by comparing the two NULL versions.
 """
-                    )
-                    version = f"NULL-{version}"
-                else:
+                )
+                version = f"NULL-{version}"
+            else:
+                with open(f"plugins/{pluginName}-spigot-{version}.jar", "wb") as f:
                     f.write(r.content)
             if knownVersions.get(plugin, "") and path.exists(
                 f"plugins/{pluginName}-spigot-{knownVersions.get(plugin, '')}.jar"
