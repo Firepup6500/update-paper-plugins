@@ -45,7 +45,7 @@ if hangarPlugins:
         if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
             # download update
             print(f"[[  Info  ]] Updating plugin {plugin}")
-            with open(f"plugins/hangar-{plugin}-{version}.jar", "wb") as f:
+            with open(f"plugins/{plugin}-hangar-{version}.jar", "wb") as f:
                 f.write(
                     request(
                         "GET",
@@ -53,9 +53,9 @@ if hangarPlugins:
                     ).content
                 )
             if knownVersions.get(plugin, "") and path.exists(
-                f"plugins/hangar-{plugin}-{knownVersions.get(plugin, '')}.jar"
+                f"plugins/{plugin}-hangar-{knownVersions.get(plugin, '')}.jar"
             ):
-                remove(f"plugins/hangar-{plugin}-{knownVersions.get(plugin, '')}.jar")
+                remove(f"plugins/{plugin}-hangar-{knownVersions.get(plugin, '')}.jar")
             print(
                 f"[[  Info  ]] Updated plugin {plugin} from {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'} to {version}"
             )
@@ -80,7 +80,7 @@ if spigotPlugins:
                 f"??  DBUG  ?? Latest version of {pluginName}({plugin}) detected to be {version}, currently installed is {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'}"
             )
         if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
-            with open(f"plugins/spigot-{pluginName}-{version}.jar", "wb") as f:
+            with open(f"plugins/{pluginName}-spigot-{version}.jar", "wb") as f:
                 f.write(
                     request(
                         "GET",
@@ -88,10 +88,10 @@ if spigotPlugins:
                     ).content
                 )
             if knownVersions.get(plugin, "") and path.exists(
-                f"plugins/spigot-{pluginName}-{knownVersions.get(plugin, '')}.jar"
+                f"plugins/{pluginName}-spigot-{knownVersions.get(plugin, '')}.jar"
             ):
                 remove(
-                    f"plugins/spigot-{pluginName}-{knownVersions.get(plugin, '')}.jar"
+                    f"plugins/{pluginName}-spigot-{knownVersions.get(plugin, '')}.jar"
                 )
             print(
                 f"[[  Info  ]] Updated plugin {pluginName} from {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'} to {version}"
