@@ -124,7 +124,7 @@ if geyser:
         """[[  Info  ]] Updating geyser even if there isn't an update availiable
 [[  Info  ]] Because my author is too lazy to implement proper update checking just for geyser and floodgate"""
     )
-    with open("plugins/geyser.jar", "wb") as f:
+    with open("plugins/Geyser-Spigot.jar", "wb") as f:
         f.write(
             request(
                 "GET",
