@@ -1,5 +1,4 @@
-from dotenv import load_dotenv
-from os import environ as env
+from os import path, remove
 from requests import request
 from ast import literal_eval as litEval
 
@@ -17,29 +16,18 @@ except ImportError:
 ||  Warn  || If this is not your first time running this script, it's recommended you investigate why."""
     )
 
-load_dotenv()
-
 hangarPlugins: dict[str, dict[str, str]] = {
-    #    "slug-of-plugin": {"Channel": "channel-to-pull", "Version": 'version-to-pull or "latest"'}
+    # "slug-of-plugin": {"Channel": "channel-to-pull", "Version": 'version-to-pull or "latest"'}
+    "ViaBackwards": {"Channel": "Snapshot", "Version": "latest"},
 }
 spigotPlugins: dict[str, dict[str, str]] = {
-    #    "resource-id-of-plugin": {"Version": 'version-id-to-pull or "latest"', "Name": "Friendly name used for local downloads of the plugin"}
+    # "resource-id-of-plugin": {"Version": 'version-id-to-pull or "latest"', "Name": "Friendly name used for local downloads of the plugin"}
+    "96927": {"Version": "latest", "Name": "DecentHolograms"},
 }
+# MOTE: I *want* to add modrinth here, but I can't figure out how to get the latest version of a project
+# Also it'd be a pain to have *more* checks because modrinth also serves client-side mods
 geyser = True
 floodgate = True
-HANGAR_KEY = env.get("HANGAR_KEY", "")
-
-if hangarPlugins and not HANGAR_KEY:
-    print(
-        """!! Notice !! This script cannot/will not download hangar plugins without a hangar api key!
-!! Notice !! Please signup for an account at https://hangar.papermc.io/auth/signup
-!! Notice !! Then generate an api key with the "view_public_info" permission at https://hangar.papermc.io/auth/settings/api-keys
-!! Notice !! While I'm not 100% sure if they *enforce* the requirement, the API docs very clearly state that an API key is required.
-!! Notice !! So even if it's not required *now* it could become enforced later.
-
-!! Notice !! Since there's no hangar api key, the defined list of hangar plugins will be COMPLETELY IGNORED on this run."""
-    )
-    hangarPlugins = {}
 
 if hangarPlugins:
     print("[[  Info  ]] Checking for updates in plugins from hangar")
@@ -50,18 +38,24 @@ if hangarPlugins:
             version = request(
                 "GET",
                 f"https://hangar.papermc.io/api/v1/projects/{plugin}/latest?channel={hangarPlugins[plugin]['Channel']}",
-                headers = {"Authorization": f"Bearer ${HANGAR_KEY}"}
             ).text
             print(
-                "??  DBUG  ?? Latest version of {plugin} detected to be {version}, currently installed is {knownVersions[plugin] if knownPlugins.get(plugin, False) else 'N/A'}"
+                f"??  DBUG  ?? Latest version of {plugin} detected to be {version}, currently installed is {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'}"
             )
         if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
             # download update
-            print(
-                f"[[  Info  ]] Updating plugin {plugin}"
-            )
-            with open(f"plugins/hangar-{plugin}-{version}", "wb") as f:
-                f.write(request("GET", f"https://https://hangar.papermc.io/api/v1/projects/{plugin}/versions/{version}/PAPER/download").content)
+            print(f"[[  Info  ]] Updating plugin {plugin}")
+            with open(f"plugins/hangar-{plugin}-{version}.jar", "wb") as f:
+                f.write(
+                    request(
+                        "GET",
+                        f"https://hangar.papermc.io/api/v1/projects/{plugin}/versions/{version}/PAPER/download",
+                    ).content
+                )
+            if knownVersions.get(plugin, "") and path.exists(
+                f"plugins/hangar-{plugin}-{knownVersions.get(plugin, '')}.jar"
+            ):
+                remove(f"plugins/hangar-{plugin}-{knownVersions.get(plugin, '')}.jar")
             print(
                 f"[[  Info  ]] Updated plugin {plugin} from {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'} to {version}"
             )
@@ -86,20 +80,52 @@ if spigotPlugins:
                 f"??  DBUG  ?? Latest version of {pluginName}({plugin}) detected to be {version}, currently installed is {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'}"
             )
         if not knownVersions.get(plugin, "") or knownVersions[plugin] != version:
-            # download update
-            with open(f"plugins/spigot-{pluginName}-{version}", "wb") as f:
-                f.write(request("GET", f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download").content)
+            with open(f"plugins/spigot-{pluginName}-{version}.jar", "wb") as f:
+                f.write(
+                    request(
+                        "GET",
+                        f"https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download",
+                    ).content
+                )
+            if knownVersions.get(plugin, "") and path.exists(
+                f"plugins/spigot-{pluginName}-{knownVersions.get(plugin, '')}.jar"
+            ):
+                remove(
+                    f"plugins/spigot-{pluginName}-{knownVersions.get(plugin, '')}.jar"
+                )
             print(
                 f"[[  Info  ]] Updated plugin {pluginName} from {knownVersions[plugin] if knownVersions.get(plugin, False) else 'N/A'} to {version}"
             )
             knownVersions[plugin] = version
 
 if geyser:
-    # download https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
-    ...
+    print(
+        """[[  Info  ]] Updating geyser even if there isn't an update availiable
+[[  Info  ]] Because my author is too lazy to implement proper update checking just for geyser and floodgate"""
+    )
+    with open("plugins/geyser.jar", "wb") as f:
+        f.write(
+            request(
+                "GET",
+                "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot",
+            ).content
+        )
 
 if floodgate:
-    # download https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
-    ...
+    print(
+        """[[  Info  ]] Updating floodgate even if there isn't an update availiable
+[[  Info  ]] Because my author is too lazy to implement proper update checking just for geyser and floodgate"""
+    )
+    with open("plugins/floodgate.jar", "wb") as f:
+        f.write(
+            request(
+                "GET",
+                "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot",
+            ).content
+        )
 
 # write cache file
+with open("cache.py", "w") as f:
+    f.write(f"knownVersions={knownVersions}")
+
+print("[[  Info  ]] Updates complete!")
