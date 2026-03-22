@@ -1,3 +1,4 @@
+#!/bin/env python
 from requests import request
 import firepup650 as fp
 

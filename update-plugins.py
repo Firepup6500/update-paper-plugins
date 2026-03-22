@@ -1,3 +1,4 @@
+#!/bin/env python
 from os import path, remove
 from requests import request
 from ast import literal_eval as litEval
