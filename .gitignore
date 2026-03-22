@@ -1,3 +1,4 @@
 plugins/**
 cache.py
+pluginList.py
 __pycache__/**

@@ -2,9 +2,10 @@ from os import path, remove
 from requests import request
 from ast import literal_eval as litEval
 from time import sleep
+import sys
 
 # Try to load cache
-print("[[  Info  ]] Trying to load installed versions from cache...")
+print("[[  Info  ]] Trying to load installed versions from cache.py...")
 knownVersions = {}
 try:
     from cache import knownVersions
@@ -17,6 +18,19 @@ except ImportError:
 ||  Warn  || If this is not your first time running this script, it's recommended you investigate why."""
     )
 
+print("[[  Info  ]] Loading requested versions from plugin_list.py...")
+hangarPlugins: dict[str, dict[str, str]] = {}
+spigotPlugins: dict[str, dict[str, str]] = {}
+try:
+    from pluginList import hangarPlugins, spigotPlugins, geyser, floodgate
+
+    print(
+        f"[[  Info  ]] Loaded {len(hangarPlugins)} plugins from hangar, and {len(spigotPlugins)} plugins from spigot"
+    )
+except ImportError:
+    print(
+        """!!  ERRR  !! Failed to load plugins! Please create a config file called 'pluginList.py'
+with contents matching the following format (all of them must exist, even if they're empty/false):
 hangarPlugins: dict[str, dict[str, str]] = {
     # "slug-of-plugin": {"Channel": "channel-to-pull", "Version": 'version-to-pull or "latest"'}
     "ViaBackwards": {"Channel": "Snapshot", "Version": "latest"},
@@ -25,10 +39,13 @@ spigotPlugins: dict[str, dict[str, str]] = {
     # "resource-id-of-plugin": {"Version": 'version-id-to-pull or "latest"', "Name": "Friendly name used for local downloads of the plugin"}
     "96927": {"Version": "latest", "Name": "DecentHolograms"},
 }
-# MOTE: I *want* to add modrinth here, but I can't figure out how to get the latest version of a project
-# Also it'd be a pain to have *more* checks because modrinth also serves client-side mods
 geyser = True
 floodgate = True
+"""
+    )
+    exit(1)
+# MOTE: I *want* to add modrinth here, but I can't figure out how to get the latest version of a project
+# Also it'd be a pain to have *more* checks because modrinth also serves client-side mods
 
 if hangarPlugins:
     print("[[  Info  ]] Checking for updates in plugins from hangar")
@@ -95,15 +112,13 @@ if spigotPlugins:
                     allow_redirects=True,
                 )
             if r.content == b"":
-                print(
-                    f"""
+                print(f"""
 !! Notice !! For whatever reason, {pluginName} is not available through the download proxy API.
 !! Notice !! The plugin download should be at https://api.spiget.org/v2/resources/{plugin}/versions/{version}/download
 !! Notice !! I apologize for not being able to get this plugin on my own, but there's nothing I can do here.
 !! Notice !! I will mark this plugin's version as 'NULL-{version}'
 !! Notice !! Which will allow you to see if this plugin needs updates on later script runs by comparing the two NULL versions.
-"""
-                )
+""")
                 version = f"NULL-{version}"
             else:
                 with open(f"plugins/{pluginName}-spigot-{version}.jar", "wb") as f:
