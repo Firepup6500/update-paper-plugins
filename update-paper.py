@@ -44,7 +44,7 @@ print(
 [[  Info  ]] Downloading selected build"""
 )
 
-with open(f"paper-{version}.jar", "wb") as f:
+with open(f"paper-{version}-{build}.jar", "wb") as f:
     f.write(
         request(
             "GET",
@@ -53,7 +53,7 @@ with open(f"paper-{version}.jar", "wb") as f:
     )
 
 print(
-    f"""[[  Info  ]] Downloaded selected build as paper-{version}.jar
+    f"""[[  Info  ]] Downloaded selected build as paper-{version}-{build}.jar
 [[  Info  ]] If you're upgrading MC versions, please retain your old server jar
 [[  Info  ]] And backup your world folders before running the new paper version
 
